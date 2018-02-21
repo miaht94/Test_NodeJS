@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>MY Chat App</title>
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="https://code.jquery.com/jquery-2.2.2.min.js"></script>
+</head>
+<body>
+    <input class="name" id="name"></input>
+    <button type="button" class="name" id="newUser">Submit</button>
+    <div class="chat" id="online" style="display:none" ></div>
+    <div class="chat" id="welcome" style="display:none"></div>
+    <div class="chat" style="display:none">
+        <input class="chat" id="typeMessage"></input>
+        <button class="chat" id="sendMessage">Send Message</button> 
+    </div>
+    <div class="chat" id="showMessage" style="display:none"></div> 
+<script>
+$(document).ready(function(){
+    var socket=io.connect();
+    var name;
+    $("#newUser").click(function () {
+             socket=socket.connect();
+                        name=$("#name").val();
+                        $(".name").remove();
+                        $(".chat").show(function () {
+                        $("#welcome").val("<h1>Welcome To My Chat App, "+name+" !!!<h1>")
+                        });
+                    socket.emit('newUser',name);
+                    });
+        socket.on("updateName",function (data){
+            $("#online").text("");
+            for (i=0;i<data.length;i++) {
+                $("#online").append("<li>"+data[i]+"</li>");
+            }
+        });
+        $("#sendMessage").on("click",function(){
+            var message=$("#typeMessage").val();
+            console.log(message);
+            console.log(socket.nickname);
+            socket.emit("sendMessage",
+            {from:name,message:message});
+        });
+        socket.on("newMessage",function(data){
+            $("#showMessage").append("<p><b>"+data.from+" : </b>"+data.message+"</p>");
+        });
+})
+</script>
+</body>
+</html>
